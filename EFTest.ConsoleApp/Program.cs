@@ -8,11 +8,18 @@ namespace EFTest.ConsoleApp
 {
     public class Program
     {
-        static NorthwindContext context = new NorthwindContext();
+        static NorthwindContext context;
 
         public static void Main()
         {
-            FindAmericanCustomersWithoutFax();
+            try
+            {
+                UpdateFax();
+            }
+            catch(Exception)
+            {
+                throw;
+            }
         }
 
         #region Select
@@ -21,17 +28,27 @@ namespace EFTest.ConsoleApp
         /// </summary>
         public static void FindExpiredProducts()
         {
-            // Find all expired products
-            IQueryable<Product> expiredProducts = (
-                from p in context.Products
-                where p.Discontinued == true
-                select p
-            );
-
-            // Output query result
-            foreach(Product product in expiredProducts)
+            try
             {
-                Console.WriteLine($"{product.ProductId} : {product.ProductName}");
+                using(context = new NorthwindContext())
+                {
+                    // Find all expired products
+                    IQueryable<Product> expiredProducts = (
+                        from p in context.Products
+                        where p.Discontinued == true
+                        select p
+                    );
+
+                    // Output query result
+                    foreach(Product product in expiredProducts)
+                    {
+                        Console.WriteLine($"{product.ProductId} : {product.ProductName}");
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                throw new DataAccessException("Finding expired products failed. See innerException for details", ex);
             }
         }
 
@@ -40,17 +57,27 @@ namespace EFTest.ConsoleApp
         /// </summary>
         public static void FindSuppliersFromQuebec()
         {
-            // Find suppliers from Québec
-            IQueryable<Supplier> suppliers = (
-                from s in context.Suppliers
-                where s.City == "Québec"
-                select s
-            );
-
-            // Output query result
-            foreach(Supplier supplier in suppliers)
+            try
             {
-                Console.WriteLine($"{supplier.CompanyName} : {supplier.Country} : {supplier.City}");
+                using(context = new NorthwindContext())
+                {
+                    // Find suppliers from Québec
+                    IQueryable<Supplier> suppliers = (
+                        from s in context.Suppliers
+                        where s.City == "Québec"
+                        select s
+                    );
+
+                    // Output query result
+                    foreach(Supplier supplier in suppliers)
+                    {
+                        Console.WriteLine($"{supplier.CompanyName} : {supplier.Country} : {supplier.City}");
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                throw new DataAccessException("Finding suppliers from Québec failed. See innerException for details.", ex);
             }
         }
 
@@ -59,17 +86,27 @@ namespace EFTest.ConsoleApp
         /// </summary>
         public static void FindSuppliersFromGermanyAndFrance()
         {
-            // Find all suppliers from Germany and France
-            IQueryable<Supplier> suppliers = (
-                from s in context.Suppliers
-                where s.Country == "Germany" || s.Country == "France"
-                select s
-            );
-
-            // Output result
-            foreach(Supplier supplier in suppliers)
+            try
             {
-                Console.WriteLine($"{supplier.CompanyName} : {supplier.Country} : {supplier.City}");
+                using(context = new NorthwindContext())
+                {
+                    // Find all suppliers from Germany and France
+                    IQueryable<Supplier> suppliers = (
+                        from s in context.Suppliers
+                        where s.Country == "Germany" || s.Country == "France"
+                        select s
+                    );
+
+                    // Output result
+                    foreach(Supplier supplier in suppliers)
+                    {
+                        Console.WriteLine($"{supplier.CompanyName} : {supplier.Country} : {supplier.City}");
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                throw new DataAccessException("Finding suppliers from Germany and France failed. See innerException for details.", ex);
             }
         }
 
@@ -78,17 +115,27 @@ namespace EFTest.ConsoleApp
         /// </summary>
         public static void FindSuppliersWithoutWebsite()
         {
-            // Find all suppliers without a website
-            IQueryable<Supplier> suppliers = (
-                from s in context.Suppliers
-                where s.HomePage == null
-                select s
-            );
-
-            // Output result
-            foreach(Supplier supplier in suppliers)
+            try
             {
-                Console.WriteLine($"{supplier.CompanyName} : {supplier.Country} : {supplier.City}");
+                using(context = new NorthwindContext())
+                {
+                    // Find all suppliers without a website
+                    IQueryable<Supplier> suppliers = (
+                        from s in context.Suppliers
+                        where s.HomePage == null
+                        select s
+                    );
+
+                    // Output result
+                    foreach(Supplier supplier in suppliers)
+                    {
+                        Console.WriteLine($"{supplier.CompanyName} : {supplier.Country} : {supplier.City}");
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                throw new DataAccessException("Finding suppliers without a website failed. See innerException for details.");
             }
         }
 
@@ -97,21 +144,31 @@ namespace EFTest.ConsoleApp
         /// </summary>
         public static void FindEuropenSuppliersWithwebsite()
         {
-            // Find all european suppliers with a website
-            IQueryable<Supplier> suppliers = (
-                from s in context.Suppliers
-                where s.Country == "Germany" || s.Country == "France" || s.Country == "UK"
-                || s.Country == "Sweden" || s.Country == "Spain" || s.Country == "Italy"
-                || s.Country == "Norway" || s.Country == "Denmark" || s.Country == "Netherlands"
-                || s.Country == "Finland"
-                && s.HomePage != null
-                select s
-            );
-
-            // Output result
-            foreach(Supplier supplier in suppliers)
+            try
             {
-                Console.WriteLine($"{supplier.CompanyName} : {supplier.Country} : {supplier.City} : {supplier.HomePage}");
+                using(context = new NorthwindContext())
+                {
+                    // Find all european suppliers with a website
+                    IQueryable<Supplier> suppliers = (
+                        from s in context.Suppliers
+                        where s.Country == "Germany" || s.Country == "France" || s.Country == "UK"
+                        || s.Country == "Sweden" || s.Country == "Spain" || s.Country == "Italy"
+                        || s.Country == "Norway" || s.Country == "Denmark" || s.Country == "Netherlands"
+                        || s.Country == "Finland"
+                        && s.HomePage != null
+                        select s
+                    );
+
+                    // Output result
+                    foreach(Supplier supplier in suppliers)
+                    {
+                        Console.WriteLine($"{supplier.CompanyName} : {supplier.Country} : {supplier.City} : {supplier.HomePage}");
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                throw new DataAccessException("Finding european suppliers without a website failed. See innerException for details.", ex);
             }
         }
 
@@ -120,17 +177,27 @@ namespace EFTest.ConsoleApp
         /// </summary>
         public static void FindEmployeesWithFirstnamesThatStartsWithM()
         {
-            // Find employees with firstnames that starts with m
-            IQueryable<Employee> employees = (
-                from e in context.Employees
-                where e.FirstName.StartsWith("M")
-                select e
-            );
-
-            // Output result
-            foreach(Employee employee in employees)
+            try
             {
-                Console.WriteLine($"{employee.EmployeeId} : {employee.FirstName} {employee.LastName}");
+                using(context = new NorthwindContext())
+                {
+                    // Find employees with firstnames that starts with m
+                    IQueryable<Employee> employees = (
+                        from e in context.Employees
+                        where e.FirstName.StartsWith("M")
+                        select e
+                    );
+
+                    // Output result
+                    foreach(Employee employee in employees)
+                    {
+                        Console.WriteLine($"{employee.EmployeeId} : {employee.FirstName} {employee.LastName}");
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                throw new DataAccessException("Finding employees with firstnames that starts with M failed. See innerException for details.", ex);
             }
         }
 
@@ -139,17 +206,27 @@ namespace EFTest.ConsoleApp
         /// </summary>
         public static void FindEmployeesWithLastnamesThatEndOnAn()
         {
-            // Find employees with lastnames that end on an
-            IQueryable<Employee> employees = (
-                from e in context.Employees
-                where e.LastName.Substring(e.LastName.Length - 2, 2) == "an"
-                select e
-            );
-
-            // Output result
-            foreach(Employee employee in employees)
+            try
             {
-                Console.WriteLine($"{employee.EmployeeId} : {employee.FirstName} {employee.LastName}");
+                using(context = new NorthwindContext())
+                {
+                    // Find employees with lastnames that end on an
+                    IQueryable<Employee> employees = (
+                        from e in context.Employees
+                        where e.LastName.Substring(e.LastName.Length - 2, 2) == "an"
+                        select e
+                    );
+
+                    // Output result
+                    foreach(Employee employee in employees)
+                    {
+                        Console.WriteLine($"{employee.EmployeeId} : {employee.FirstName} {employee.LastName}");
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                throw new DataAccessException("Finding employees with lastnames that end on 'an' failed. See innerException for details.", ex);
             }
         }
 
@@ -158,17 +235,27 @@ namespace EFTest.ConsoleApp
         /// </summary>
         public static void FindFemaleEmployeesThatAreNotDoctors()
         {
-            // Find employees with lastnames that end on an
-            IQueryable<Employee> employees = (
-                from e in context.Employees
-                where e.TitleOfCourtesy == "Dr."
-                select e
-            );
-
-            // Output result
-            foreach(Employee employee in employees)
+            try
             {
-                Console.WriteLine($"{employee.EmployeeId} : {employee.TitleOfCourtesy} {employee.FirstName} {employee.LastName}");
+                using(context = new NorthwindContext())
+                {
+                    // Find employees with lastnames that end on an
+                    IQueryable<Employee> employees = (
+                        from e in context.Employees
+                        where e.TitleOfCourtesy != "Dr."
+                        select e
+                    );
+
+                    // Output result
+                    foreach(Employee employee in employees)
+                    {
+                        Console.WriteLine($"{employee.EmployeeId} : {employee.TitleOfCourtesy} {employee.FirstName} {employee.LastName}");
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                throw new DataAccessException("Finding female employees that are not doctors failed. See innerException for details.", ex);
             }
         }
 
@@ -177,17 +264,27 @@ namespace EFTest.ConsoleApp
         /// </summary>
         public static void FindSalesRepresentativesFromTheUk()
         {
-            // Find sales representatives from the uk
-            IQueryable<Employee> employees = (
-                from e in context.Employees
-                where e.Title == "Sales Representative" && e.Country == "UK"
-                select e
-            );
-
-            // Output result
-            foreach(Employee employee in employees)
+            try
             {
-                Console.WriteLine($"{employee.EmployeeId} : {employee.Title} {employee.FirstName} {employee.LastName} : {employee.Country}");
+                using(context = new NorthwindContext())
+                {
+                    // Find sales representatives from the uk
+                    IQueryable<Employee> employees = (
+                        from e in context.Employees
+                        where e.Title == "Sales Representative" && e.Country == "UK"
+                        select e
+                    );
+
+                    // Output result
+                    foreach(Employee employee in employees)
+                    {
+                        Console.WriteLine($"{employee.EmployeeId} : {employee.Title} {employee.FirstName} {employee.LastName} : {employee.Country}");
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                throw new DataAccessException("Finding sales representatives from the UK failed. See innerException for details.", ex);
             }
         }
 
@@ -196,11 +293,21 @@ namespace EFTest.ConsoleApp
         /// </summary>
         public static void FindTotalProductAmount()
         {
-            // Get product amount
-            int productAmount = context.Products.ToList().Count;
+            try
+            {
+                using(context = new NorthwindContext())
+                {
+                    // Get product amount
+                    int productAmount = context.Products.ToList().Count;
 
-            // Output result
-            Console.WriteLine($"Amount of products: {productAmount}");
+                    // Output result
+                    Console.WriteLine($"Amount of products: {productAmount}");
+                }
+            }
+            catch(Exception ex)
+            {
+                throw new DataAccessException("Finding the total product amount failed. See innerException for details.", ex);
+            }
         }
 
         /// <summary>
@@ -208,11 +315,21 @@ namespace EFTest.ConsoleApp
         /// </summary>
         public static void FindAverageProductPrice()
         {
-            // Find the average product price
-            decimal? averagePrice = context.Products.Sum(p => p.UnitPrice) / context.Products.Count<Product>();
+            try
+            {
+                using(context = new NorthwindContext())
+                {
+                    // Find the average product price
+                    decimal? averagePrice = context.Products.Sum(p => p.UnitPrice) / context.Products.Count<Product>();
 
-            // Output result
-            Console.WriteLine($"{averagePrice:c}");
+                    // Output result
+                    Console.WriteLine($"{averagePrice:c}");
+                }
+            }
+            catch(Exception ex)
+            {
+                throw new DataAccessException("Finding the average product price failed. See innerException for details.", ex);
+            }
         }
 
         /// <summary>
@@ -220,17 +337,27 @@ namespace EFTest.ConsoleApp
         /// </summary>
         public static void FindProductsWithUnitPriceOverTwentySortByHighestPrice()
         {
-            // Find products with unit price over twenty sort by highest
-            IOrderedQueryable<Product> products = (
-                from p in context.Products
-                where p.UnitPrice >= 20
-                select p
-            ).OrderByDescending(p => p.UnitPrice);
-
-            // Output result
-            foreach(Product product in products)
+            try
             {
-                Console.WriteLine($"{product.ProductId} : {product.ProductName} : {product.UnitPrice}");
+                using(context = new NorthwindContext())
+                {
+                    // Find products with unit price over twenty sort by highest
+                    IOrderedQueryable<Product> products = (
+                        from p in context.Products
+                        where p.UnitPrice >= 20
+                        select p
+                    ).OrderByDescending(p => p.UnitPrice);
+
+                    // Output result
+                    foreach(Product product in products)
+                    {
+                        Console.WriteLine($"{product.ProductId} : {product.ProductName} : {product.UnitPrice}");
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                throw new DataAccessException("Finding products with a unit price over twenty failed. See innerException for details.", ex);
             }
         }
 
@@ -239,17 +366,27 @@ namespace EFTest.ConsoleApp
         /// </summary>
         public static void FindSoldOutProductsSortAlphabetically()
         {
-            // Find sold out products sort alphabetically
-            IOrderedQueryable<Product> soldOutProducts = (
-                from p in context.Products
-                where p.UnitsInStock == 0
-                select p
-            ).OrderBy(p => p.ProductName);
-
-            // Output result
-            foreach(Product product in soldOutProducts)
+            try
             {
-                Console.WriteLine($"{product.ProductName} : {product.UnitPrice:c} : {product.UnitsInStock}");
+                using(context = new NorthwindContext())
+                {
+                    // Find sold out products sort alphabetically
+                    IOrderedQueryable<Product> soldOutProducts = (
+                        from p in context.Products
+                        where p.UnitsInStock == 0
+                        select p
+                    ).OrderBy(p => p.ProductName);
+
+                    // Output result
+                    foreach(Product product in soldOutProducts)
+                    {
+                        Console.WriteLine($"{product.ProductName} : {product.UnitPrice:c} : {product.UnitsInStock}");
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                throw new DataAccessException("Finding sold out products failed. See innerException for details.", ex);
             }
         }
 
@@ -258,17 +395,27 @@ namespace EFTest.ConsoleApp
         /// </summary>
         public static void FindProductsOutOfStockWithNoOrders()
         {
-            // Find products out of stock with no orders
-            IOrderedQueryable<Product> products = (
-                from p in context.Products
-                where p.UnitsInStock == 0 && p.UnitsOnOrder == 0 && p.Discontinued == false
-                select p
-            ).OrderBy(p => p.ProductName);
-
-            // Output result
-            foreach(Product product in products)
+            try
             {
-                Console.WriteLine($"{product.ProductName} : {product.UnitPrice:c} : {product.UnitsInStock}");
+                using(context = new NorthwindContext())
+                {
+                    // Find products out of stock with no orders
+                    IOrderedQueryable<Product> products = (
+                        from p in context.Products
+                        where p.UnitsInStock == 0 && p.UnitsOnOrder == 0 && p.Discontinued == false
+                        select p
+                    ).OrderBy(p => p.ProductName);
+
+                    // Output result
+                    foreach(Product product in products)
+                    {
+                        Console.WriteLine($"{product.ProductName} : {product.UnitPrice:c} : {product.UnitsInStock}");
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                throw new DataAccessException("Finding products out of stock with no orders failed. See innerException for details.", ex);
             }
         }
 
@@ -277,18 +424,28 @@ namespace EFTest.ConsoleApp
         /// </summary>
         public static void FindFrenchOwnersAndBritishSellers()
         {
-            // Find french owners and british sellers
-            IOrderedQueryable<Customer> customers = (
-                from c in context.Customers
-                where c.Country == "France" && c.ContactTitle == "Owner" || c.Country == "UK" && c.ContactTitle.Contains("Sales")
-                select c
-            ).OrderBy(c => c.Country)
-            .ThenBy(c => c.ContactName);
-
-            // Output result
-            foreach(Customer customer in customers)
+            try
             {
-                Console.WriteLine($"{customer.Country} : {customer.ContactName} : {customer.ContactTitle}");
+                using(context = new NorthwindContext())
+                {
+                    // Find french owners and british sellers
+                    IOrderedQueryable<Customer> customers = (
+                        from c in context.Customers
+                        where c.Country == "France" && c.ContactTitle == "Owner" || c.Country == "UK" && c.ContactTitle.Contains("Sales")
+                        select c
+                    ).OrderBy(c => c.Country)
+                    .ThenBy(c => c.ContactName);
+
+                    // Output result
+                    foreach(Customer customer in customers)
+                    {
+                        Console.WriteLine($"{customer.Country} : {customer.ContactName} : {customer.ContactTitle}");
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                throw new DataAccessException("Finding french owners and british sellers failed. See innerException for details.", ex);
             }
         }
 
@@ -297,24 +454,152 @@ namespace EFTest.ConsoleApp
         /// </summary>
         public static void FindAmericanCustomersWithoutFax()
         {
-            // Find american customers without fax
-            IOrderedQueryable<Customer> customers = (
-                from c in context.Customers
-                where c.Fax == null && c.Country == "Mexico"
-                || c.Fax == null && c.Country == "Argentina"
-                || c.Fax == null && c.Country == "Brazil"
-                || c.Fax == null && c.Country == "Venezuela"
-                || c.Fax == null && c.Country == "USA"
-                select c
-            ).OrderBy(c => c.CompanyName);
-
-            // Output result
-            foreach(Customer customer in customers)
+            try
             {
-                Console.WriteLine($"{customer.CompanyName} : {customer.ContactName}");
+                using(context = new NorthwindContext())
+                {
+                    // Find american customers without fax
+                    IOrderedQueryable<Customer> customers = (
+                        from c in context.Customers
+                        where c.Fax == null && c.Country == "Mexico"
+                        || c.Fax == null && c.Country == "Argentina"
+                        || c.Fax == null && c.Country == "Brazil"
+                        || c.Fax == null && c.Country == "Venezuela"
+                        || c.Fax == null && c.Country == "USA"
+                        select c
+                    ).OrderBy(c => c.CompanyName);
+
+                    // Output result
+                    foreach(Customer customer in customers)
+                    {
+                        Console.WriteLine($"{customer.CompanyName} : {customer.ContactName}");
+                    }
+                }
             }
-        } 
+            catch(Exception ex)
+            {
+                throw new DataAccessException("Finding american customers with no fax failed. See innerException for details.", ex);
+            }
+        }
         #endregion
 
+        #region Update
+        /// <summary>
+        /// 1. Opdater alle leverandørers fax til no fax number, hvis ikke der er et fax nummer. Gør det samme for alle kunder
+        /// </summary>
+        public static void UpdateFax()
+        {
+            try
+            {
+                using(context = new NorthwindContext())
+                {
+                    IQueryable<Supplier> suppliers = from s in context.Suppliers where s.Fax == null select s;
+
+                    IQueryable<Customer> customers = from c in context.Customers where c.Fax == null select c;
+
+                    foreach(Supplier supplier in suppliers)
+                    {
+                        supplier.Fax = "no fax number";
+                    }
+
+                    foreach(Customer customer in customers)
+                    {
+                        customer.Fax = "no fax number";
+                    }
+
+                    context.SaveChanges();
+                }
+            }
+            catch(Exception ex)
+            {
+                throw new DataAccessException("Updating fax number failed. See inner exception for details.", ex);
+            }
+        }
+
+        /// <summary>
+        /// 2. Opdater genbestillingsmængden for alle ikke-ugåede produkter, hvis nuværende genbestillings-mængde er 0 og nuværende beholdning er mindre en 20, til 10.
+        /// </summary>
+        public static void UpdateReorderAmount()
+        {
+            try
+            {
+                using(context = new NorthwindContext())
+                {
+                    IQueryable<Product> products = from p in context.Products where p.Discontinued == false && p.ReorderLevel == 0 && p.UnitsInStock < 20 select p;
+
+                    foreach(Product product in products)
+                    {
+                        product.UnitsOnOrder = 10;
+                    }
+
+                    context.SaveChanges();
+                }
+            }
+            catch(Exception ex)
+            {
+                throw new DataAccessException("Updating reorder amount failed. See innerException for details.", ex);
+            }
+        }
+
+        /// <summary>
+        /// 3. Opdater alle spanske kunder med den korrekte region. Se spanske regioner på wikipedia og/eller google maps.
+        /// </summary>
+        public static void UpdateSpanishCustomers()
+        {
+            try
+            {
+                using(context = new NorthwindContext())
+                {
+                    IQueryable customers = from c in context.Customers where c.Country == "Spain" select c;
+
+                    foreach(Customer customer in customers)
+                    {
+                        switch(customer.City)
+                        {
+                            case "Madrid":
+                                customer.Region = "Madrid";
+                                break;
+                            case "Barcelona":
+                                customer.Region = "Catalonien";
+                                break;
+                            case "Sevilla":
+                                customer.Region = "Andalusia";
+                                break;
+
+                        }
+                    }
+
+                    context.SaveChanges();
+                }
+            }
+            catch(Exception ex)
+            {
+                throw new DataAccessException("Updating spanish customers failed. See innerException for details.", ex);
+            }
+        }
+
+        /// <summary>
+        /// 4. Simons bistro har ændret navn til Simons Vaffelhus og flyttet til Strandvejen 65, 7100 Vejle. Foretag opdateringen.
+        /// </summary>
+        public static void UpdateCustomerSimon()
+        {
+            try
+            {
+                using(context = new NorthwindContext())
+                {
+                    Customer customer = (from c in context.Customers where c.CustomerId == "SIMOB" select c).First();
+
+                    customer.CompanyName = "Simons Vaffelhus";
+                    customer.Address = "Strandvejen 65, 7100 Vejle";
+
+                    context.SaveChanges();
+                }
+            }
+            catch(Exception ex)
+            {
+                throw new DataAccessException("Updating customer failed. See innerException for details.", ex);
+            }
+        }
+        #endregion
     }
 }
