@@ -14,7 +14,7 @@ namespace EFTest.ConsoleApp
         {
             try
             {
-                UpdateFax();
+                UpdateCustomerSimon();
             }
             catch(Exception)
             {
@@ -135,7 +135,7 @@ namespace EFTest.ConsoleApp
             }
             catch(Exception ex)
             {
-                throw new DataAccessException("Finding suppliers without a website failed. See innerException for details.");
+                throw new DataAccessException("Finding suppliers without a website failed. See innerException for details.", ex);
             }
         }
 
@@ -587,12 +587,15 @@ namespace EFTest.ConsoleApp
             {
                 using(context = new NorthwindContext())
                 {
-                    Customer customer = (from c in context.Customers where c.CustomerId == "SIMOB" select c).First();
+                    Customer customer = (from c in context.Customers where c.CustomerId == "SIMOB" select c).FirstOrDefault();
 
-                    customer.CompanyName = "Simons Vaffelhus";
-                    customer.Address = "Strandvejen 65, 7100 Vejle";
+                    if(customer != null)
+                    {
+                        customer.CompanyName = "Simons Vaffelhus";
+                        customer.Address = "Strandvejen 65, 7100 Vejle";
 
-                    context.SaveChanges();
+                        context.SaveChanges();
+                    }
                 }
             }
             catch(Exception ex)
@@ -600,6 +603,193 @@ namespace EFTest.ConsoleApp
                 throw new DataAccessException("Updating customer failed. See innerException for details.", ex);
             }
         }
+
+        /// <summary>
+        /// 5. White Clover Markets er flyttet til 247 New Avenue, Chicago og har skifter nummer til 555-20159. Foretag opdateringen.
+        /// </summary>
+        public static void UpdateWhiteCloverMarket()
+        {
+            try
+            {
+                using(context = new NorthwindContext())
+                {
+                    Customer customer = (from c in context.Customers where c.CustomerId == "WHITC" select c).FirstOrDefault();
+
+                    if(customer != null)
+                    {
+                        customer.City = "Chicago";
+                        customer.Address = "247 New Avenue";
+                        customer.Phone = "555-20159";
+
+                        context.SaveChanges();
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                throw new DataAccessException("Updating customer failed. See innerException for details.", ex);
+            }
+        }
+
+        /// <summary>
+        /// 6. Medarbejderen Janet er flyttet ind hos medarbejderen Andrew. Foretag opdateringen.
+        /// </summary>
+        public static void UpdateEmployee()
+        {
+            try
+            {
+                using(context = new NorthwindContext())
+                {
+                    Employee employee = (from e in context.Employees where e.EmployeeId == 3 select e).FirstOrDefault();
+
+                    if(employee != null)
+                    {
+                        employee.City = "Tacoma";
+                        employee.PostalCode = "98401";
+                        employee.HomePhone = "(206) 555-9482";
+                        employee.Address = "908 W. Capital Way";
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                throw new DataAccessException("Updating employee Janet failed. See innerException for details.", ex);
+            }
+        }
+        #endregion
+
+        #region Insert
+        /// <summary>
+        /// 1. Northwind har ansat Kim Larsen CPR: 190583-7856, Violvej 45, Sønderborg, tlf 75835264, pr. 1. januar i år. IT support gav han tlf. ext. 0745. Der er ikke npoget billede af Kim.
+        /// </summary>
+        public static void InsertKimLarsen()
+        {
+            try
+            {
+                using(context = new NorthwindContext())
+                {
+                    Employee employee = new Employee()
+                    {
+                        EmployeeId = 0,
+                        TitleOfCourtesy = "Mr.",
+                        FirstName = "Kim",
+                        LastName = "Larsen",
+                        Address = "Violvej 45",
+                        City = "Sønderborg",
+                        PostalCode = "6400",
+                        Country = "Denmark",
+                        HireDate = DateTime.Now,
+                        Title = "Sales Assistent",
+                        HomePhone = "75835264",
+                        BirthDate = new DateTime(1983, 05, 19),
+                        Extension = "0745",
+                    };
+
+                    context.Employees.Add(employee);
+
+                    context.SaveChanges();
+                }
+            }
+            catch(Exception ex)
+            {
+                throw new DataAccessException("Inserting Kim Larsen failed. See innerException for details.", ex);
+            }
+        }
+
+        /// <summary>
+        /// 2. Northwind har hyret alle lærerne på din AspIT afdeling pr. næste 1. i måneden. 
+        /// Disse medarbejdere skal INSERTes i det samme statement og ikke i hvert sit statement – altså et INSERT men mange VA-LUES-rækker. 
+        /// Alle medarbejderne får AspITs hovednummer som tlf men hver sin ext. 
+        /// Du skal vælge AspIT afdelingernes adresser som adresser til medarbejderne – som skal være forskellige.
+        /// </summary>
+        public static void RegisterEmployees()
+        {
+            try
+            {
+                using(context = new NorthwindContext())
+                {
+                    List<Employee> employees = new List<Employee>()
+                    {
+                        new Employee() {
+                            EmployeeId = 0,
+                            FirstName = "Mads",
+                            LastName = "Rasmussen",
+                            BirthDate = new DateTime(1991, 03, 14),
+                            HireDate = DateTime.Now,
+                            Title = "Pajeet",
+                            TitleOfCourtesy = "Mr.",
+                            HomePhone = "72 162 742",
+                            Extension = "2836",
+                            Address = "Strandvejen 1",
+                            City = "Vejle",
+                            PostalCode = "7120",
+                            Country = "Denmark",
+                        },
+                        new Employee()
+                        {
+                            EmployeeId = 0,
+                            FirstName = "Preben",
+                            LastName = "Bisgaard",
+                            BirthDate = new DateTime(1987, 06, 27),
+                            HireDate = DateTime.Now,
+                            Title = "Britbong",
+                            TitleOfCourtesy = "Mr.",
+                            HomePhone = "72 162 742",
+                            Extension = "8375",
+                            Address = "Holmen 23",
+                            City = "Vejle",
+                            PostalCode = "7100",
+                            Country = "Denmark",
+                        },
+                    };
+
+                    foreach(Employee employee in employees)
+                    {
+                        context.Employees.Add(employee);
+                    }
+
+                    context.SaveChanges();
+                }
+            }
+            catch(Exception ex)
+            {
+                throw new DataAccessException("Inserting employees failed. See innerException for details.", ex);
+            }
+        }
+
+        /// <summary>
+        /// 3. Der er et nyt produkt på banen: SuperDuperBeer. Tilføj dette produkt med passende valg af værdier til kolonnerne.
+        /// </summary>
+        public static void RegisterProduct()
+        {
+            try
+            {
+                using(context = new NorthwindContext())
+                {
+                    Product product = new Product()
+                    {
+                        ProductId = 0,
+                        ProductName = "SuperDuperBeer",
+                        CategoryId = 1,
+                        UnitsInStock = 45,
+                        UnitPrice = 25,
+                        ReorderLevel = 0,
+                        Discontinued = false
+                    };
+
+                    context.Products.Add(product);
+
+                    context.SaveChanges();
+                }
+            }
+            catch(Exception ex)
+            {
+
+                throw new DataAccessException("Inserting SuperDuperBeer failed. See innerException for details.", ex);
+            }
+        }
+
+
         #endregion
     }
 }
