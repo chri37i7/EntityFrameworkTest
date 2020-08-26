@@ -14,11 +14,13 @@ namespace EFTest.ConsoleApp
         {
             try
             {
-                UpdateCustomerSimon();
+                FindEmployees();
             }
-            catch(Exception)
+            catch(Exception ex)
             {
-                throw;
+                Console.WriteLine($"{ex.Message}\n{ex.InnerException.Message}");
+
+                Console.ReadLine();
             }
         }
 
@@ -784,12 +786,270 @@ namespace EFTest.ConsoleApp
             }
             catch(Exception ex)
             {
-
                 throw new DataAccessException("Inserting SuperDuperBeer failed. See innerException for details.", ex);
             }
         }
 
+        /// <summary>
+        /// 4. der er en ny Leverandør: Campus Vejle. Find info om dem og tilføj leverandøren.
+        /// </summary>
+        public static void InsertCampusVejle()
+        {
+            try
+            {
+                using(context = new NorthwindContext())
+                {
+                    Supplier supplier = new Supplier()
+                    {
+                        CompanyName = "Campus Vejle",
+                        ContactName = "Finn Dyhre Hansen",
+                        ContactTitle = "Advokat",
+                        HomePage = "https://campusvejle.dk/",
+                        Phone = "72162616",
+                        Address = "Boulevarden 48",
+                        City = "Vejle",
+                        PostalCode = "7100",
+                        Country = "Denmark",
+                    };
 
+                    context.Suppliers.Add(supplier);
+
+                    context.SaveChanges();
+                }
+            }
+            catch(Exception ex)
+            {
+                throw new DataAccessException("Inserting Campus Vejle failed. See innerException for details.", ex);
+            }
+        }
+
+        /// <summary>
+        /// 5. Campus Vejle er nu leverandør af SuperDuperBeer.
+        /// </summary>
+        public static void ChangeSupplier()
+        {
+            try
+            {
+                using(context = new NorthwindContext())
+                {
+                    Product product = (from p in context.Products where p.ProductName == "SuperDuperBeer" select p).FirstOrDefault();
+
+                    Supplier supplier = (from s in context.Suppliers where s.CompanyName == "Campus Vejle" select s).FirstOrDefault();
+
+                    product.Supplier = supplier;
+
+                    context.SaveChanges();
+                }
+            }
+            catch(Exception ex)
+            {
+
+                throw new DataAccessException("Changing supplier failed. See innerException for details", ex);
+            }
+        }
+
+        /// <summary>
+        /// 6. Der er en ny Shipper: Mærsk. Tilføj den.
+        /// </summary>
+        public static void AddNewSupplier()
+        {
+            try
+            {
+                Shipper shipper = new Shipper()
+                {
+                    CompanyName = "A.P. Møller - Mærsk",
+                    Phone = "72162616"
+                };
+
+                context.Shippers.Add(shipper);
+
+                context.SaveChanges();
+            }
+            catch(Exception ex)
+            {
+
+                throw new DataAccessException("Inserting a new supplier failed. See innerException for details.", ex);
+            }
+        }
+        #endregion
+
+        #region Joins
+        /// <summary>
+        /// 1. Find beskrivelserne for alle territorier og deres tilhørende regioner – hver kombination skal kun vises én gang (DISTINCT).
+        /// </summary>
+        public static void FindTerritories()
+        {
+            try
+            {
+                using(context = new NorthwindContext())
+                {
+                    // Join Territories with Region, remove duplicates with Distinct
+                    var territories = (from t in context.Territories
+                                       join r in context.Regions
+                                       on t.RegionId equals r.RegionId
+                                       select new { t, r }
+                                       ).OrderBy(o => o.t.RegionId)
+                                       .Distinct();
+
+                    foreach(var item in territories)
+                    {
+                        Console.WriteLine($"ID:{item.t.TerritoryId}, Territory: {item.t.TerritoryDescription}, Region: {item.r.RegionDescription}");
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+
+                throw new DataAccessException("Finding territories failed. See innerException for details.", ex);
+            }
+        }
+
+        /// <summary>
+        /// 2. Find alle produkter der er drikkevarer og som ikke er udgået. Vis Produktnavn, pris og lagerbehold-ning, sorter efter lagerbeholdning, dernæst produktnavn.
+        /// </summary>
+        public static void FindBeverages()
+        {
+            try
+            {
+                using(context = new NorthwindContext())
+                {
+                    var result = (from p in context.Products
+                                  join c in context.Categories
+                                  on p.CategoryId equals c.CategoryId
+                                  where c.CategoryName == "Beverages"
+                                  && p.Discontinued == false
+                                  orderby p.UnitsInStock descending, p.ProductName descending
+                                  select new { p, c }
+                                  );
+
+                    foreach(var item in result)
+                    {
+                        Console.WriteLine($"Product: {item.p.ProductName}, Category: {item.c.CategoryName}, Units in stock: {item.p.UnitsInStock}");
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+
+                throw new DataAccessException("Finding all beverages failed. See innerException for details.", ex);
+            }
+        }
+
+        /// <summary>
+        /// 3. Find navnene på alle kunder der har placeret en ordre i februar 1997. Sorter efter ordredato, dernæst kundenavn.
+        /// </summary>
+        public static void FindCustomerWhoPlacedAnOrder()
+        {
+            try
+            {
+                using(context = new NorthwindContext())
+                {
+                    var result = (from o in context.Orders
+                                  join c in context.Customers
+                                  on o.CustomerId equals c.CustomerId
+                                  where o.OrderDate >= new DateTime(1997, 02, 01)
+                                  && o.OrderDate <= new DateTime(1997, 02, 28)
+                                  orderby o.OrderDate descending, c.CompanyName descending
+                                  select new { o, c });
+
+                    foreach(var item in result)
+                    {
+                        Console.WriteLine($"Order Date: {item.o.OrderDate}, Company: {item.c.CompanyName}");
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+
+                throw new DataAccessException("Finding customers failed. See innerException for details.", ex);
+            }
+        }
+
+        /// <summary>
+        /// 4. Find navnene på alle kunderne og udskibningsdato for ordrer, der blev placeret i hele 2. kvartal 1997. Sorter efter nyeste ordredato, dernæst kundenavn.
+        /// </summary>
+        public static void FindSomeOtherCustomers()
+        {
+            try
+            {
+                using(context = new NorthwindContext())
+                {
+                    var result = (from o in context.Orders
+                                  join c in context.Customers
+                                  on o.CustomerId equals c.CustomerId
+                                  where o.OrderDate >= new DateTime(1997, 04, 01)
+                                  && o.OrderDate <= new DateTime(1997, 06, 30)
+                                  orderby o.OrderDate ascending, c.CompanyName descending
+                                  select new { o, c });
+
+                    foreach(var item in result)
+                    {
+                        Console.WriteLine($"Shipped Date: {item.o.ShippedDate}, Company: {item.c.CompanyName}");
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                throw new DataAccessException("Finding customers failed. See innerException for details.", ex);
+            }
+        }
+
+        /// <summary>
+        /// 5. Find de 9 leverandører der laver drikkevarer og vis kun disse 9 firmanavne, sorter efter navn.
+        /// </summary>
+        public static void FindBeverageCompanies()
+        {
+            try
+            {
+                using(context = new NorthwindContext())
+                {
+                    var result = (from s in context.Suppliers
+                                  join p in context.Products
+                                  on s.SupplierId equals p.SupplierId
+                                  join c in context.Categories
+                                  on p.CategoryId equals c.CategoryId
+                                  where p.CategoryId == 1
+                                  select new { s, p, c });
+
+                    foreach(var item in result)
+                    {
+                        Console.WriteLine($"Company: {item.s.CompanyName}, Product {item.p.ProductName}, Category: {item.c.CategoryName}");
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+
+                throw new DataAccessException("Finding beverage companies failed. See innerException for details.", ex);
+            }
+        }
+
+        /// <summary>
+        /// 6. Find fornavn og efternavn på alle medarbejdere, samt hvilken medarbejder der er deres chef (chefens fornavn og efternavn skal vises), sorter efter chefens efternavn.
+        /// </summary>
+        public static void FindEmployees()
+        {
+            try
+            {
+                using(context = new NorthwindContext())
+                {
+                    var result = (from e in context.Employees
+                                  join b in context.Employees
+                                  on e.ReportsTo equals b.EmployeeId
+                                  orderby b.FirstName descending, e.FirstName descending
+                                  select new { e, b });
+
+                    foreach(var item in result)
+                    {
+                        Console.WriteLine($"Employee: {item.e.FirstName} {item.e.LastName}, Reports To: {item.b.FirstName} {item.b.LastName}");
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                throw new DataAccessException("Finding employees failed. See innerException for details.", ex);
+            }
+        }
         #endregion
     }
 }
